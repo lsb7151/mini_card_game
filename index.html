@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>미션 레이드 · 카드 뽑기 게임</title>
+  <meta name="description" content="7개의 미션 카드 중 3장을 뽑는 간단 웹게임 (1번 카드는 항상 포함)" />
+  <style>
+    :root{
+      --bg: #0f172a;          /* slate-900 */
+      --panel: #0b1022;       /* deep navy */
+      --ink: #e2e8f0;         /* slate-200 */
+      --muted: #94a3b8;       /* slate-400 */
+      --accent: #22c55e;      /* emerald-500 */
+      --accent-2: #38bdf8;    /* sky-400 */
+      --danger: #ef4444;      /* red-500 */
+      --card: #111827;        /* gray-900 */
+      --card-face: #111827;
+      --card-back: linear-gradient(135deg,#1f2937 0%,#0b1022 50%,#1f2937 100%);
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; background: radial-gradient(1000px 500px at 50% -20%,#1f2937 0%,#0f172a 50%,#0b1022 100%);
+      color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Nanum Gothic", sans-serif;
+      display:flex; align-items:center; justify-content:center; padding:24px;
+    }
+    .app{width:min(1100px,100%);}
+    header{display:flex; gap:12px; align-items:flex-end; justify-content:space-between; margin-bottom:16px}
+    .title{font-size:clamp(22px,4vw,36px); font-weight:800; letter-spacing:.3px}
+    .subtitle{color:var(--muted); font-size:14px}
+
+    .panel{background:rgba(255,255,255,.03); border:1px solid rgba(148,163,184,.2); border-radius:var(--radius); box-shadow:var(--shadow);}
+    .toolbar{display:flex; gap:10px; flex-wrap:wrap; padding:14px; align-items:center; justify-content:space-between}
+    .btn{appearance:none; border:1px solid rgba(148,163,184,.35); background:#0b1328; color:#e5e7eb; padding:10px 14px; border-radius:14px; font-weight:700; letter-spacing:.2px; cursor:pointer; transition:transform .05s ease, background .2s ease, border-color .2s ease}
+    .btn:hover{transform:translateY(-1px); background:#0f1a3b}
+    .btn.primary{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#16a34a}
+    .btn.primary:hover{background:linear-gradient(180deg,#22c55e,#16a34a)}
+    .btn.ghost{background:transparent}
+
+    .deck-area{display:grid; grid-template-columns: 1fr; gap:16px; padding:16px}
+    .area{border-top:1px solid rgba(148,163,184,.18); padding-top:12px}
+
+    .cards{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:16px}
+    @media (max-width: 860px){ .cards{grid-template-columns:1fr} }
+
+    .card{perspective:1000px; position:relative; height:220px}
+    .card-inner{position:absolute; inset:0; transform-style:preserve-3d; transition: transform .9s cubic-bezier(.2,.7,.2,1)}
+    .card.revealed .card-inner{ transform: rotateY(180deg) }
+
+    .face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; overflow:hidden; }
+    .face.back{ background:var(--card-back); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.1)}
+    .back .pattern{
+      width:68%; height:68%; border-radius:12px; background:
+        radial-gradient(circle at 20% 20%, rgba(255,255,255,.12), transparent 40%),
+        radial-gradient(circle at 80% 80%, rgba(255,255,255,.08), transparent 40%),
+        linear-gradient(45deg, rgba(56,189,248,.3), rgba(34,197,94,.25));
+      border:1px solid rgba(255,255,255,.2);
+      display:flex; align-items:center; justify-content:center; font-weight:900; letter-spacing:1px;
+      text-transform:uppercase; color:#e5e7eb;
+    }
+    .face.front{ transform: rotateY(180deg); background:var(--card-face); border:1px solid rgba(255,255,255,.1); display:flex; flex-direction:column; padding:16px }
+    .badge{font-size:12px; color:#93c5fd; letter-spacing:.4px}
+    .num{margin-top:8px; font-weight:900; font-size:20px; background:linear-gradient(90deg,#38bdf8,#22c55e); -webkit-background-clip:text; background-clip:text; color:transparent}
+    .mission{margin-top:8px; font-weight:700; font-size:16px; line-height:1.4}
+    .note{margin-top:auto; font-size:12px; color:var(--muted)}
+
+    .deck{height:220px; display:grid; place-items:center; position:relative}
+    .deck-stack{
+      position:absolute; width:180px; height:240px;
+      transform: translateY(-6px);
+    }
+    .deck-card{
+      position:absolute; inset:0; border-radius:16px; background:var(--card-back); border:1px solid rgba(255,255,255,.12);
+      transform: translate(var(--tx,0), var(--ty,0)) rotate(var(--rot,0deg));
+      animation: float 3s ease-in-out infinite;
+      box-shadow: var(--shadow);
+    }
+    .deck-card:nth-child(2){ --tx: 4px; --ty: -4px; --rot: -3deg }
+    .deck-card:nth-child(3){ --tx: -6px; --ty: 6px; --rot: 5deg }
+    @keyframes float{ 0%,100%{ transform: translate(var(--tx,0), var(--ty,0)) rotate(var(--rot,0deg)) } 50%{ transform: translate(calc(var(--tx,0) + 0px), calc(var(--ty,0) - 8px)) rotate(calc(var(--rot,0deg) + .2deg)) } }
+
+    .hint{color:var(--muted); font-size:13px; margin-top:4px}
+
+    .toast{ position:fixed; inset:auto 50% 24px auto; transform:translateX(-50%); background:#0b1328; color:#e5e7eb; padding:10px 14px; border-radius:12px; border:1px solid rgba(148,163,184,.35); box-shadow:var(--shadow); opacity:0; pointer-events:none }
+    .toast.show{ opacity:1; animation: toast 2.2s ease forwards }
+    @keyframes toast{ 0%{opacity:0; transform:translate(-50%,6px)} 10%,85%{opacity:1; transform:translate(-50%,0)} 100%{opacity:0; transform:translate(-50%,-4px)} }
+
+    .confetti{ position:fixed; inset:0; pointer-events:none }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <div class="title">미션 레이드 · 카드 뽑기</div>
+        <div class="subtitle">7개의 미션 중 <b>3장</b>을 뽑습니다. (<b>1번 미션</b>은 항상 포함)</div>
+      </div>
+      <div class="subtitle">공유 방법: 이 파일(index.html)을 업로드하면 누구나 접속 가능 (GitHub Pages/Vercel/웹서버)</div>
+    </header>
+
+    <section class="panel">
+      <div class="toolbar">
+        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+          <button class="btn primary" id="drawBtn">🎲 3장 뽑기</button>
+          <button class="btn ghost" id="revealBtn" disabled>🃏 순서대로 공개</button>
+          <button class="btn" id="resetBtn">초기화</button>
+        </div>
+        <div class="hint">카드 뽑기 효과와 플립 애니메이션이 포함되어 있습니다.</div>
+      </div>
+
+      <div class="deck-area">
+        <div class="deck">
+          <div class="deck-stack" id="deckStack" aria-label="카드 더미">
+            <div class="deck-card"></div>
+            <div class="deck-card"></div>
+            <div class="deck-card"></div>
+          </div>
+        </div>
+
+        <div class="area">
+          <div class="cards" id="cards"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <canvas class="confetti" id="fx"></canvas>
+  <div class="toast" id="toast">카드를 셔플했습니다!</div>
+
+  <script>
+    // ===== 데이터: 7개 미션 =====
+    const MISSIONS = [
+      {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기"},
+      {num:2, text:"내부(블랙서큐버스 브레이크 기믹)에 단 한 번도 참여하지 않고 레이드 성공하기"},
+      {num:3, text:"혼자 3번 이상 죽고 레이드 성공하기"},
+      {num:4, text:"퀵슬롯을 전부 비우고 단 한 번도 죽지 않고 레이드 성공하기", note:"(전투 시작/후 스샷 필수)"},
+      {num:5, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어 타임 기준)"},
+      {num:6, text:"나머지 두 명이 미션 실패하기"},
+      {num:7, text:"마지막에 죽은 상태로 레이드 클리어하기"},
+    ];
+
+    // 유틸: 섞기
+    const shuffle = (arr) => {
+      const a = [...arr];
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    };
+
+    // 3장 뽑기 (1번 카드 반드시 포함)
+    function drawThreeWithOneGuaranteed(){
+      const rest = [2,3,4,5,6,7];
+      const pick = shuffle(rest).slice(0,2); // 2장 뽑고
+      pick.push(1); // 1번 추가
+      return shuffle(pick); // 순서 섞기
+    }
+
+    // DOM 참조
+    const cardsEl = document.getElementById('cards');
+    const drawBtn = document.getElementById('drawBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const toast = document.getElementById('toast');
+
+    let drawn = []; // 뽑힌 카드 번호 배열
+    let revealIndex = 0; // 공개 진행 인덱스
+
+    // 카드 엘리먼트 생성
+    function createCard(){
+      const wrap = document.createElement('div');
+      wrap.className = 'card';
+      wrap.innerHTML = `
+        <div class="card-inner">
+          <div class="face back"><div class="pattern">MISSION</div></div>
+          <div class="face front">
+            <div class="badge">미션 카드</div>
+            <div class="num">NO.<span class="no">?</span></div>
+            <div class="mission">...</div>
+            <div class="note"></div>
+          </div>
+        </div>`;
+      return wrap;
+    }
+
+    function showToast(msg){
+      toast.textContent = msg; toast.classList.remove('show');
+      void toast.offsetWidth; // reflow
+      toast.classList.add('show');
+    }
+
+    // 간단한 컨페티 효과
+    function confettiBurst(){
+      const cvs = document.getElementById('fx');
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width = window.innerWidth;
+      const h = cvs.height = window.innerHeight;
+      const pieces = Array.from({length: 120}, () => ({
+        x: Math.random()*w,
+        y: -10 - Math.random()*h*0.3,
+        vy: 1 + Math.random()*3,
+        vx: -1 + Math.random()*2,
+        s: 2 + Math.random()*4,
+        r: Math.random()*Math.PI,
+        vr: -0.2 + Math.random()*0.4,
+        color: `hsl(${Math.random()*360},90%,60%)`
+      }));
+      let life = 90; // frames
+      function tick(){
+        ctx.clearRect(0,0,w,h);
+        pieces.forEach(p=>{
+          p.x += p.vx; p.y += p.vy; p.r += p.vr;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
+          ctx.restore();
+        });
+        if(life-->0) requestAnimationFrame(tick); else ctx.clearRect(0,0,w,h);
+      }
+      tick();
+    }
+
+    // 뽑기
+    drawBtn.addEventListener('click', () => {
+      // 초기화
+      cardsEl.innerHTML = '';
+      revealIndex = 0;
+      drawn = drawThreeWithOneGuaranteed();
+
+      // 3장의 자리 생성 + 덱에서 날아오는 애니메이션
+      drawn.forEach((n, i) => {
+        const el = createCard();
+        el.style.opacity = 0; el.style.transform = 'translateY(10px)';
+        cardsEl.appendChild(el);
+        setTimeout(()=>{
+          el.style.transition = 'transform .5s ease, opacity .5s ease';
+          el.style.opacity = 1; el.style.transform = 'translateY(0)';
+        }, 180*i);
+      });
+
+      // 덱 흔들림 느낌
+      const deck = document.getElementById('deckStack');
+      deck.animate([
+        { transform:'translateY(0) rotate(0deg)' },
+        { transform:'translateY(2px) rotate(1deg)' },
+        { transform:'translateY(-2px) rotate(-1deg)' },
+        { transform:'translateY(0) rotate(0deg)' }
+      ], { duration: 480, easing:'ease-in-out' });
+
+      showToast('카드를 셔플했습니다! (1번 카드 포함 보장)');
+      revealBtn.disabled = false;
+    });
+
+    // 순서대로 공개 (플립)
+    revealBtn.addEventListener('click', () => {
+      const nodes = [...cardsEl.children];
+      if (revealIndex >= nodes.length) return;
+      const wrap = nodes[revealIndex];
+      const inner = wrap.querySelector('.card-inner');
+      const no = wrap.querySelector('.no');
+      const mission = wrap.querySelector('.mission');
+      const note = wrap.querySelector('.note');
+
+      const cardNum = drawn[revealIndex];
+      const info = MISSIONS.find(m=>m.num===cardNum);
+      no.textContent = info.num;
+      mission.textContent = info.text;
+      note.textContent = info.note || '';
+
+      wrap.classList.add('revealed');
+      revealIndex++;
+
+      if (revealIndex === 3){
+        confettiBurst();
+        revealBtn.disabled = true;
+        showToast('모든 카드가 공개되었습니다!');
+      }
+    });
+
+    // 초기화
+    resetBtn.addEventListener('click', () => {
+      cardsEl.innerHTML = '';
+      revealIndex = 0; drawn = [];
+      revealBtn.disabled = true;
+      showToast('초기화 완료');
+    });
+  </script>
+</body>
+</html>
