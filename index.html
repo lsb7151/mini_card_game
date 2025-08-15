@@ -128,163 +128,188 @@
   <canvas class="confetti" id="fx"></canvas>
   <div class="toast" id="toast">카드를 셔플했습니다!</div>
 
-  <script>
-    // ===== 데이터: 7개 미션 =====
-    const MISSIONS = [
-      {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기"},
-      {num:2, text:"내부(블랙서큐버스 브레이크 기믹)에 단 한 번도 참여하지 않고 레이드 성공하기"},
-      {num:3, text:"혼자 3번 이상 죽고 레이드 성공하기"},
-      {num:4, text:"퀵슬롯을 전부 비우고 단 한 번도 죽지 않고 레이드 성공하기", note:"(전투 시작/후 스샷 필수)"},
-      {num:5, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어 타임 기준)"},
-      {num:6, text:"나머지 두 명이 미션 실패하기"},
-      {num:7, text:"마지막에 죽은 상태로 레이드 클리어하기"},
-    ];
+ <script>
+  // ===== 데이터: 7개 미션 =====
+  const MISSIONS = [
+    {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기"},
+    {num:2, text:"내부(블랙서큐버스 브레이크 기믹)에 단 한 번도 참여하지 않고 레이드 성공하기"},
+    {num:3, text:"혼자 3번 이상 죽고 레이드 성공하기"},
+    {num:4, text:"퀵슬롯을 전부 비우고 단 한 번도 죽지 않고 레이드 성공하기", note:"(전투 시작/후 스샷 필수)"},
+    {num:5, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어 타임 기준)"},
+    {num:6, text:"나머지 두 명이 미션 실패하기"},
+    {num:7, text:"마지막에 죽은 상태로 레이드 클리어하기"},
+  ];
 
-    // 유틸: 섞기
-    const shuffle = (arr) => {
-      const a = [...arr];
-      for(let i=a.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]]=[a[j],a[i]];
-      }
-      return a;
-    };
-
-    // 3장 뽑기 (1번 카드 반드시 포함)
-    function drawThreeWithOneGuaranteed(){
-      const rest = [2,3,4,5,6,7];
-      const pick = shuffle(rest).slice(0,2); // 2장 뽑고
-      pick.push(1); // 1번 추가
-      return shuffle(pick); // 순서 섞기
+  // 유틸: 섞기
+  const shuffle = (arr) => {
+    const a = [...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
     }
+    return a;
+  };
 
-    // DOM 참조
-    const cardsEl = document.getElementById('cards');
-    const drawBtn = document.getElementById('drawBtn');
-    const revealBtn = document.getElementById('revealBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const toast = document.getElementById('toast');
+  // 3장 뽑기 (1번 카드 반드시 포함)
+  function drawThreeWithOneGuaranteed(){
+    const rest = [2,3,4,5,6,7];
+    const pick = shuffle(rest).slice(0,2); // 2장 뽑고
+    pick.push(1);                           // 1번 추가
+    return shuffle(pick);                   // 순서 섞기
+  }
 
-    let drawn = []; // 뽑힌 카드 번호 배열
-    let revealIndex = 0; // 공개 진행 인덱스
+  // DOM 참조
+  const cardsEl = document.getElementById('cards');
+  const drawBtn = document.getElementById('drawBtn');
+  const revealBtn = document.getElementById('revealBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const toast = document.getElementById('toast');
 
-    // 카드 엘리먼트 생성
-    function createCard(){
-      const wrap = document.createElement('div');
-      wrap.className = 'card';
-      wrap.innerHTML = `
-        <div class="card-inner">
-          <div class="face back"><div class="pattern">MISSION</div></div>
-          <div class="face front">
-            <div class="badge">미션 카드</div>
-            <div class="num">NO.<span class="no">?</span></div>
-            <div class="mission">...</div>
-            <div class="note"></div>
-          </div>
-        </div>`;
-      return wrap;
-    }
+  let drawn = [];           // 뽑힌 카드 번호 배열 (좌→우 대응)
+  let autoRevealing = false; // 자동 공개 중 여부
 
-    function showToast(msg){
-      toast.textContent = msg; toast.classList.remove('show');
-      void toast.offsetWidth; // reflow
-      toast.classList.add('show');
-    }
+  // 토스트
+  function showToast(msg){
+    toast.textContent = msg; toast.classList.remove('show');
+    void toast.offsetWidth; // reflow
+    toast.classList.add('show');
+  }
 
-    // 간단한 컨페티 효과
-    function confettiBurst(){
-      const cvs = document.getElementById('fx');
-      const ctx = cvs.getContext('2d');
-      const w = cvs.width = window.innerWidth;
-      const h = cvs.height = window.innerHeight;
-      const pieces = Array.from({length: 120}, () => ({
-        x: Math.random()*w,
-        y: -10 - Math.random()*h*0.3,
-        vy: 1 + Math.random()*3,
-        vx: -1 + Math.random()*2,
-        s: 2 + Math.random()*4,
-        r: Math.random()*Math.PI,
-        vr: -0.2 + Math.random()*0.4,
-        color: `hsl(${Math.random()*360},90%,60%)`
-      }));
-      let life = 90; // frames
-      function tick(){
-        ctx.clearRect(0,0,w,h);
-        pieces.forEach(p=>{
-          p.x += p.vx; p.y += p.vy; p.r += p.vr;
-          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
-          ctx.fillStyle = p.color; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
-          ctx.restore();
-        });
-        if(life-->0) requestAnimationFrame(tick); else ctx.clearRect(0,0,w,h);
-      }
-      tick();
-    }
-
-    // 뽑기
-    drawBtn.addEventListener('click', () => {
-      // 초기화
-      cardsEl.innerHTML = '';
-      revealIndex = 0;
-      drawn = drawThreeWithOneGuaranteed();
-
-      // 3장의 자리 생성 + 덱에서 날아오는 애니메이션
-      drawn.forEach((n, i) => {
-        const el = createCard();
-        el.style.opacity = 0; el.style.transform = 'translateY(10px)';
-        cardsEl.appendChild(el);
-        setTimeout(()=>{
-          el.style.transition = 'transform .5s ease, opacity .5s ease';
-          el.style.opacity = 1; el.style.transform = 'translateY(0)';
-        }, 180*i);
+  // 컨페티
+  function confettiBurst(){
+    const cvs = document.getElementById('fx');
+    const ctx = cvs.getContext('2d');
+    const w = cvs.width = window.innerWidth;
+    const h = cvs.height = window.innerHeight;
+    const pieces = Array.from({length: 120}, () => ({
+      x: Math.random()*w,
+      y: -10 - Math.random()*h*0.3,
+      vy: 1 + Math.random()*3,
+      vx: -1 + Math.random()*2,
+      s: 2 + Math.random()*4,
+      r: Math.random()*Math.PI,
+      vr: -0.2 + Math.random()*0.4,
+      color: `hsl(${Math.random()*360},90%,60%)`
+    }));
+    let life = 90; // frames
+    function tick(){
+      ctx.clearRect(0,0,w,h);
+      pieces.forEach(p=>{
+        p.x += p.vx; p.y += p.vy; p.r += p.vr;
+        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+        ctx.fillStyle = p.color; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
+        ctx.restore();
       });
+      if(life-->0) requestAnimationFrame(tick); else ctx.clearRect(0,0,w,h);
+    }
+    tick();
+  }
 
-      // 덱 흔들림 느낌
-      const deck = document.getElementById('deckStack');
-      deck.animate([
-        { transform:'translateY(0) rotate(0deg)' },
-        { transform:'translateY(2px) rotate(1deg)' },
-        { transform:'translateY(-2px) rotate(-1deg)' },
-        { transform:'translateY(0) rotate(0deg)' }
-      ], { duration: 480, easing:'ease-in-out' });
+  // 카드 한 장 공개
+  function revealCardAt(index){
+    const nodes = [...cardsEl.children];
+    const wrap = nodes[index];
+    if (!wrap || wrap.classList.contains('revealed')) return;
 
-      showToast('카드를 셔플했습니다! (1번 카드 포함 보장)');
-      revealBtn.disabled = false;
-    });
+    const no = wrap.querySelector('.no');
+    const mission = wrap.querySelector('.mission');
+    const note = wrap.querySelector('.note');
 
-    // 순서대로 공개 (플립)
-    revealBtn.addEventListener('click', () => {
-      const nodes = [...cardsEl.children];
-      if (revealIndex >= nodes.length) return;
-      const wrap = nodes[revealIndex];
-      const inner = wrap.querySelector('.card-inner');
-      const no = wrap.querySelector('.no');
-      const mission = wrap.querySelector('.mission');
-      const note = wrap.querySelector('.note');
+    const cardNum = drawn[index];
+    const info = MISSIONS.find(m=>m.num===cardNum);
+    no.textContent = info.num;
+    mission.textContent = info.text;
+    note.textContent = info.note || '';
 
-      const cardNum = drawn[revealIndex];
-      const info = MISSIONS.find(m=>m.num===cardNum);
-      no.textContent = info.num;
-      mission.textContent = info.text;
-      note.textContent = info.note || '';
+    wrap.classList.add('revealed');
 
-      wrap.classList.add('revealed');
-      revealIndex++;
-
-      if (revealIndex === 3){
-        confettiBurst();
-        revealBtn.disabled = true;
-        showToast('모든 카드가 공개되었습니다!');
-      }
-    });
-
-    // 초기화
-    resetBtn.addEventListener('click', () => {
-      cardsEl.innerHTML = '';
-      revealIndex = 0; drawn = [];
+    // 모두 공개되면 마무리
+    if (nodes.every(n => n.classList.contains('revealed'))) {
       revealBtn.disabled = true;
-      showToast('초기화 완료');
+      confettiBurst();
+      showToast('모든 카드가 공개되었습니다!');
+    }
+  }
+
+  // 순서대로 자동 공개 (0.5초 간격)
+  function revealInOrder(){
+    if (autoRevealing) return;
+    autoRevealing = true;
+
+    const nodes = [...cardsEl.children];
+    let i = 0;
+    function step(){
+      if (i >= nodes.length) {
+        autoRevealing = false;
+        return;
+      }
+      revealCardAt(i++);
+      setTimeout(step, 500);
+    }
+    step();
+  }
+
+  // 카드 DOM 생성
+  function createCard(){
+    const wrap = document.createElement('div');
+    wrap.className = 'card';
+    wrap.innerHTML = `
+      <div class="card-inner">
+        <div class="face back"><div class="pattern">MISSION</div></div>
+        <div class="face front">
+          <div class="badge">미션 카드</div>
+          <div class="num">NO.<span class="no">?</span></div>
+          <div class="mission">...</div>
+          <div class="note"></div>
+        </div>
+      </div>`;
+    return wrap;
+  }
+
+  // 뽑기
+  drawBtn.addEventListener('click', () => {
+    // 초기화
+    cardsEl.innerHTML = '';
+    drawn = drawThreeWithOneGuaranteed();
+    autoRevealing = false;
+
+    // 3장의 자리 생성 + 덱에서 날아오는 애니메이션 + 클릭 공개 연결
+    drawn.forEach((n, i) => {
+      const el = createCard();
+      el.style.opacity = 0; el.style.transform = 'translateY(10px)';
+      // 카드 클릭 시 해당 카드 공개
+      el.addEventListener('click', () => revealCardAt(i));
+      cardsEl.appendChild(el);
+      setTimeout(()=>{
+        el.style.transition = 'transform .5s ease, opacity .5s ease';
+        el.style.opacity = 1; el.style.transform = 'translateY(0)';
+      }, 180*i);
     });
-  </script>
+
+    // 덱 흔들림 느낌
+    const deck = document.getElementById('deckStack');
+    deck.animate([
+      { transform:'translateY(0) rotate(0deg)' },
+      { transform:'translateY(2px) rotate(1deg)' },
+      { transform:'translateY(-2px) rotate(-1deg)' },
+      { transform:'translateY(0) rotate(0deg)' }
+    ], { duration: 480, easing:'ease-in-out' });
+
+    showToast('카드를 셔플했습니다! (1번 카드 포함 보장)');
+    revealBtn.disabled = false;
+  });
+
+  // 순서대로 공개
+  revealBtn.addEventListener('click', revealInOrder);
+
+  // 초기화
+  resetBtn.addEventListener('click', () => {
+    cardsEl.innerHTML = '';
+    drawn = [];
+    autoRevealing = false;
+    revealBtn.disabled = true;
+    showToast('초기화 완료');
+  });
+</script>
 </body>
 </html>
