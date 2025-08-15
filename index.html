@@ -7,127 +7,69 @@
   <meta name="description" content="봄비길드 이벤트용 카드뽑기 아무도 내 고생은 몰라주지" />
   <style>
     :root{
-      --bg: #0f172a;          /* slate-900 */
-      --panel: #0b1022;       /* deep navy */
-      --ink: #e2e8f0;         /* slate-200 */
-      --muted: #94a3b8;       /* slate-400 */
-      --accent: #22c55e;      /* emerald-500 */
-      --accent-2: #38bdf8;    /* sky-400 */
-      --danger: #ef4444;      /* red-500 */
-      --card: #111827;        /* gray-900 */
-      --card-face: #111827;
-      --card-back: linear-gradient(135deg,#1f2937 0%,#0b1022 50%,#1f2937 100%);
-      --radius: 18px;
-      --shadow: 0 10px 30px rgba(0,0,0,.35);
+      --bg:#0f172a;--panel:#0b1022;--ink:#e2e8f0;--muted:#94a3b8;--accent:#22c55e;--accent-2:#38bdf8;--danger:#ef4444;--card:#111827;--card-face:#111827;--card-back:linear-gradient(135deg,#1f2937 0%,#0b1022 50%,#1f2937 100%);--radius:18px;--shadow:0 10px 30px rgba(0,0,0,.35)
     }
     *{box-sizing:border-box}
-    html, body{
-  min-height: 100%;
-  height: auto;
-}
-  body{
-  margin:0;
-  background: radial-gradient(1000px 500px at 50% -20%,#1f2937 0%,#0f172a 50%,#0b1022 100%);
-  color:var(--ink);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Nanum Gothic", sans-serif;
-  display:block;                /* 스크롤 정상화 */
-  padding:24px 16px;
-  overflow-y:auto;              /* iOS 포함 스크롤 보장 */
-  -webkit-overflow-scrolling: touch;
-}
-   .app{
-  width:min(1200px,100%);
-  margin: 0 auto;              /* 가운데 정렬 */
-}
-    header{display:flex; gap:12px; align-items:flex-end; justify-content:space-between; margin-bottom:16px}
-    .title{font-size:clamp(22px,4vw,36px); font-weight:800; letter-spacing:.3px}
-    .subtitle{color:var(--muted); font-size:14px}
-
-    .panel{background:rgba(255,255,255,.03); border:1px solid rgba(148,163,184,.2); border-radius:var(--radius); box-shadow:var(--shadow);}
-    .toolbar{display:flex; gap:10px; flex-wrap:wrap; padding:14px; align-items:center; justify-content:space-between}
-    .btn{appearance:none; border:1px solid rgba(148,163,184,.35); background:#0b1328; color:#e5e7eb; padding:10px 14px; border-radius:14px; font-weight:700; letter-spacing:.2px; cursor:pointer; transition:transform .05s ease, background .2s ease, border-color .2s ease}
-    .btn:hover{transform:translateY(-1px); background:#0f1a3b}
-    .btn.primary{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#16a34a}
+    html,body{min-height:100%;height:auto}
+    body{
+      margin:0;background:radial-gradient(1000px 500px at 50% -20%,#1f2937 0%,#0f172a 50%,#0b1022 100%);color:var(--ink);
+      font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic","맑은 고딕","Nanum Gothic",sans-serif;
+      display:block;padding:24px 16px;overflow-y:auto;-webkit-overflow-scrolling:touch
+    }
+    .app{width:min(1200px,100%);margin:0 auto}
+    header{display:flex;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:16px}
+    .title{font-size:clamp(22px,4vw,36px);font-weight:800;letter-spacing:.3px}
+    .subtitle{color:var(--muted);font-size:14px}
+    .panel{background:rgba(255,255,255,.03);border:1px solid rgba(148,163,184,.2);border-radius:var(--radius);box-shadow:var(--shadow)}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;padding:14px;align-items:center;justify-content:space-between}
+    .btn{appearance:none;border:1px solid rgba(148,163,184,.35);background:#0b1328;color:#e5e7eb;padding:10px 14px;border-radius:14px;font-weight:700;letter-spacing:.2px;cursor:pointer;transition:transform .05s ease,background .2s ease,border-color .2s ease}
+    .btn:hover{transform:translateY(-1px);background:#0f1a3b}
+    .btn.primary{background:linear-gradient(180deg,#16a34a,#15803d);border-color:#16a34a}
     .btn.primary:hover{background:linear-gradient(180deg,#22c55e,#16a34a)}
     .btn.ghost{background:transparent}
-    .btn.warn{background:linear-gradient(180deg,#ef4444,#b91c1c); border-color:#ef4444}
-
-    .segmented{display:flex; gap:6px; padding:6px; background:#0b1328; border:1px solid rgba(148,163,184,.25); border-radius:14px}
-    .segmented button{border:none; background:transparent; color:#e5e7eb; padding:8px 12px; border-radius:10px; font-weight:700; cursor:pointer}
+    .btn.warn{background:linear-gradient(180deg,#ef4444,#b91c1c);border-color:#ef4444}
+    .segmented{display:flex;gap:6px;padding:6px;background:#0b1328;border:1px solid rgba(148,163,184,.25);border-radius:14px}
+    .segmented button{border:none;background:transparent;color:#e5e7eb;padding:8px 12px;border-radius:10px;font-weight:700;cursor:pointer}
     .segmented button.active{background:#1f2a52}
-
-    .deck-area{display:grid; grid-template-columns: 1fr; gap:16px; padding:16px}
-    .area{border-top:1px solid rgba(148,163,184,.18); padding-top:12px}
-
-    .cards{
-  display:grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 220px → 300px */
-  gap:20px; /* 16px → 20px (여백 살짝 확대) */
-}
-
-    .card{
-  perspective:1000px;
-  position:relative;
-  height:320px; /* 220px → 320px */
-}
-    .card-inner{position:absolute; inset:0; transform-style:preserve-3d; transition: transform .9s cubic-bezier(.2,.7,.2,1)}
-    .card.revealed .card-inner{ transform: rotateY(180deg) }
-
-    .face{ position:absolute; inset:0; backface-visibility:hidden; border-radius:16px; overflow:hidden; }
-    .face.back{ background:var(--card-back); display:flex; align-items:center; justify-content:center; border:1px solid rgba(255,255,255,.1)}
-    .back .pattern{
-      width:68%; height:68%; border-radius:12px; background:
-        radial-gradient(circle at 20% 20%, rgba(255,255,255,.12), transparent 40%),
-        radial-gradient(circle at 80% 80%, rgba(255,255,255,.08), transparent 40%),
-        linear-gradient(45deg, rgba(56,189,248,.3), rgba(34,197,94,.25));
-      border:1px solid rgba(255,255,255,.2);
-      display:flex; align-items:center; justify-content:center; font-weight:900; letter-spacing:1px;
-      text-transform:uppercase; color:#e5e7eb;
-    }
-    .face.front{ transform: rotateY(180deg); background:var(--card-face); border:1px solid rgba(255,255,255,.1); display:flex; flex-direction:column; padding:16px }
-    .badge{font-size:12px; color:#93c5fd; letter-spacing:.4px}
-    .num{margin-top:8px; font-weight:900; font-size:20px; background:linear-gradient(90deg,#38bdf8,#22c55e); -webkit-background-clip:text; background-clip:text; color:transparent}
-    .mission{margin-top:8px; font-weight:700; font-size:16px; line-height:1.4}
-    .note{margin-top:auto; font-size:12px; color:var(--muted)}
-.mission, .note{
-  overflow-wrap:anywhere; 
-}
-    @media (max-width: 860px){
-  .cards{ grid-template-columns:1fr; }
-  .card{ height:360px; } /* 모바일에서 더 높게 */
-}
-    .deck{height:220px; display:grid; place-items:center; position:relative}
-    .deck-stack{
-      position:absolute; width:180px; height:240px;
-      transform: translateY(-6px);
-    }
-    .deck-card{
-      position:absolute; inset:0; border-radius:16px; background:var(--card-back); border:1px solid rgba(255,255,255,.12);
-      transform: translate(var(--tx,0), var(--ty,0)) rotate(var(--rot,0deg));
-      animation: float 3s ease-in-out infinite;
-      box-shadow: var(--shadow);
-    }
-    .deck-card:nth-child(2){ --tx: 4px; --ty: -4px; --rot: -3deg }
-    .deck-card:nth-child(3){ --tx: -6px; --ty: 6px; --rot: 5deg }
-    @keyframes float{ 0%,100%{ transform: translate(var(--tx,0), var(--ty,0)) rotate(var(--rot,0deg)) } 50%{ transform: translate(calc(var(--tx,0) + 0px), calc(var(--ty,0) - 8px)) rotate(calc(var(--rot,0deg) + .2deg)) } }
-
-    .hint{color:var(--muted); font-size:13px; margin-top:4px}
-
-    .toast{ position:fixed; inset:auto 50% 24px auto; transform:translateX(-50%); background:#0b1328; color:#e5e7eb; padding:10px 14px; border-radius:12px; border:1px solid rgba(148,163,184,.35); box-shadow:var(--shadow); opacity:0; pointer-events:none }
-    .toast.show{ opacity:1; animation: toast 2.2s ease forwards }
-    @keyframes toast{ 0%{opacity:0; transform:translate(-50%,6px)} 10%,85%{opacity:1; transform:translate(-50%,0)} 100%{opacity:0; transform:translate(-50%,-4px)} }
-
-    .confetti{ position:fixed; inset:0; pointer-events:none }
-
-    .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:50 }
-    .modal.show{ display:flex }
-    .modal-card{ width:min(800px,92%); background:#0b1328; color:#e5e7eb; border:1px solid rgba(148,163,184,.28); border-radius:16px; box-shadow:var(--shadow); }
-    .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(148,163,184,.2)}
-    .modal-body{ max-height:70vh; overflow:auto; padding:16px }
-    .modal-close{ border:none; background:#111827; color:#e5e7eb; border-radius:10px; padding:8px 12px; cursor:pointer }
-    .mission-list{ margin:0; padding-left:20px }
-    .mission-list li{ margin:6px 0 }
-    .mode-meta{ color:var(--muted); font-size:12px; margin-left:8px }
+    .deck-area{display:grid;grid-template-columns:1fr;gap:16px;padding:16px}
+    .area{border-top:1px solid rgba(148,163,184,.18);padding-top:12px}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:20px}
+    .card{perspective:1000px;position:relative;height:340px}
+    .card-inner{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .9s cubic-bezier(.2,.7,.2,1)}
+    .card.revealed .card-inner{transform:rotateY(180deg)}
+    .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;overflow:hidden}
+    .face.back{background:var(--card-back);display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.1)}
+    .back .pattern{width:68%;height:68%;border-radius:12px;background:radial-gradient(circle at 20% 20%,rgba(255,255,255,.12),transparent 40%),radial-gradient(circle at 80% 80%,rgba(255,255,255,.08),transparent 40%),linear-gradient(45deg,rgba(56,189,248,.3),rgba(34,197,94,.25));border:1px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-weight:900;letter-spacing:1px;text-transform:uppercase;color:#e5e7eb}
+    .face.front{transform:rotateY(180deg);background:var(--card-face);border:1px solid rgba(255,255,255,.1);display:flex;flex-direction:column;padding:20px}
+    .badge{font-size:12px;color:#93c5fd;letter-spacing:.4px}
+    .num{margin-top:8px;font-weight:900;font-size:22px;background:linear-gradient(90deg,#38bdf8,#22c55e);-webkit-background-clip:text;background-clip:text;color:transparent}
+    .prob-badge{margin-top:8px;align-self:flex-start;font-size:12px;font-weight:800;color:#0b1328;background:linear-gradient(180deg,#93c5fd,#60a5fa);padding:4px 8px;border-radius:999px}
+    .mission{margin-top:10px;font-weight:800;font-size:18px;line-height:1.65;word-break:keep-all;overflow-wrap:anywhere;color:#eef2f7}
+    .note{margin-top:12px;font-size:13px;color:var(--muted)}
+    .deck{height:220px;display:grid;place-items:center;position:relative}
+    .deck-stack{position:absolute;width:180px;height:240px;transform:translateY(-6px)}
+    .deck-card{position:absolute;inset:0;border-radius:16px;background:var(--card-back);border:1px solid rgba(255,255,255,.12);transform:translate(var(--tx,0),var(--ty,0)) rotate(var(--rot,0deg));animation:float 3s ease-in-out infinite;box-shadow:var(--shadow)}
+    .deck-card:nth-child(2){--tx:4px;--ty:-4px;--rot:-3deg}
+    .deck-card:nth-child(3){--tx:-6px;--ty:6px;--rot:5deg}
+    @keyframes float{0%,100%{transform:translate(var(--tx,0),var(--ty,0)) rotate(var(--rot,0deg))}50%{transform:translate(calc(var(--tx,0) + 0px),calc(var(--ty,0) - 8px)) rotate(calc(var(--rot,0deg) + .2deg))}}
+    .hint{color:var(--muted);font-size:13px;margin-top:4px}
+    .toast{position:fixed;inset:auto 50% 24px auto;transform:translateX(-50%);background:#0b1328;color:#e5e7eb;padding:10px 14px;border-radius:12px;border:1px solid rgba(148,163,184,.35);box-shadow:var(--shadow);opacity:0;pointer-events:none}
+    .toast.show{opacity:1;animation:toast 2.2s ease forwards}
+    @keyframes toast{0%{opacity:0;transform:translate(-50%,6px)}10%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0;transform:translate(-50%,-4px)}}
+    .confetti{position:fixed;inset:0;pointer-events:none}
+    .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:50}
+    .modal.show{display:flex}
+    .modal-card{width:min(860px,92%);background:#0b1328;color:#e5e7eb;border:1px solid rgba(148,163,184,.28);border-radius:16px;box-shadow:var(--shadow)}
+    .modal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid rgba(148,163,184,.2)}
+    .modal-body{max-height:72vh;overflow:auto;padding:16px}
+    .modal-close{border:none;background:#111827;color:#e5e7eb;border-radius:10px;padding:8px 12px;cursor:pointer}
+    .mission-list{margin:0;padding-left:0;list-style:none}
+    .mission-list li{margin:0 0 10px 0;padding:10px 12px;border:1px solid rgba(148,163,184,.18);border-radius:12px;background:#0f1a3b;line-height:1.6}
+    .mode-meta{color:var(--muted);font-size:12px;margin-left:8px}
+    .li-head{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+    .li-num{font-weight:900;color:#60a5fa}
+    .li-prob{margin-left:auto;font-size:12px;font-weight:800;color:#0b1328;background:linear-gradient(180deg,#93c5fd,#60a5fa);padding:3px 8px;border-radius:999px}
+    @media (max-width:860px){.cards{grid-template-columns:1fr}.card{height:360px}body{padding:16px 10px}}
   </style>
 </head>
 <body>
@@ -141,13 +83,11 @@
 
     <section class="panel">
       <div class="toolbar">
-
         <div class="segmented" role="tablist" aria-label="레이드 선택">
           <button id="modeSuccubus" class="active" role="tab" aria-selected="true">서큐버스</button>
           <button id="modeGeulgi" role="tab" aria-selected="false">글기 어려움</button>
         </div>
-
-        <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
           <button class="btn primary" id="drawBtn">🎲 뽑기</button>
           <button class="btn ghost" id="revealBtn" disabled>🃏 순서대로 공개</button>
           <button class="btn" id="viewAllBtn">미션 전체보기</button>
@@ -171,7 +111,6 @@
     </section>
   </div>
 
-
   <div class="modal" id="modal">
     <div class="modal-card">
       <div class="modal-head">
@@ -191,267 +130,104 @@
   <div class="toast" id="toast">카드를 셔플했습니다!</div>
 
   <script>
-
-    const GAMES = {
-      succubus: {
-        name: "서큐버스",
-        draw: 3,
-        missions: [
-          {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기"},
-          {num:2, text:"내부(블랙서큐버스 브레이크 기믹)에 단 한번도 참여하지않고 레이드 성공하기"},
-          {num:3, text:"혼자 3번이상 죽고 레이드 성공하기"},
-          {num:4, text:"퀵슬롯을 전부 비우고 단한번도 죽지않고 레이드 성공하기", note:"(전투 시작, 전투 후 스샷 필요)"},
-          {num:5, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어타임 표기를 기준으로 합니다)"},
-          {num:6, text:"나머지 두명이 미션 실패하기"},
-          {num:7, text:"마지막에 죽은상태로 레이드 클리어하기"},
-          {num:8, text:"방어구를 모두 입지않고 클리어하기"}
-        ]
-      },
-      geulgi: {
-        name: "글기 어려움",
-        draw: 7,
-        missions: [
-          {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기", note:"(조력자가 있을수도 있습니다)"},
-          {num:2, text:"혼자 3번이상 죽고 레이드 성공하기"},
-          {num:3, text:"방어구를 모두 입지않고 클리어하기", note:"(아이템 분해나 판매를 조심하세요! 잠그고 착용해제!)"},
-          {num:4, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어타임 표기를 기준으로 합니다)"},
-          {num:5, text:"나머지인원중 5명이상 미션 실패하기"},
-          {num:6, text:"마지막에 죽은상태로 레이드 클리어하기"},
-          {num:7, text:"운도 실력. 어떻게든 클리어만 하기"},
-          {num:8, text:"파괴되는 지형에서 낙사 두번이상하고 클리어하기"},
-          {num:9, text:"퀵슬롯을 전부 비우고 단한번도 죽지않고 레이드 성공하기", note:"(전투 시작, 전투 후 스샷 필요)"},
-          {num:10, text:"보스 전투중에 파티채팅으로 채팅 17회 하기"},
-          {num:11, text:"(레이드 실패하기 미션을 가진사람이 한명있습니다 비밀로 해주세요) 해당 미션을 가진사람에게 들키지 않고 도와서 레이드 실패하기", note:"- 레이드 실패하기 미션을 받은사람은 조력자를 맞추는 미션이 따로 있습니다. 들키지 마세요."},
-          {num:12, text:"악세를 하나도 착용하지않고 클리어하기", note:"(아이템 분해나 판매를 조심하세요! 잠그고 착용해제!)"},
-          {num:13, text:"진짜 아이디어가 없다 이젠 딜 3등안에 들기"},
-          {num:14, text:"음식 가장 먼저 주기(혼자먹기x)"},
-          {num:15, text:"본직업 외의 다른 직업으로 바꿔서 들키지않고 클리어하기"}
-        ]
-      }
+    const GAMES={
+      succubus:{name:"서큐버스",draw:3,missions:[
+        {num:1,text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기"},
+        {num:2,text:"내부(블랙서큐버스 브레이크 기믹)에 단 한번도 참여하지않고 레이드 성공하기"},
+        {num:3,text:"혼자 3번이상 죽고 레이드 성공하기"},
+        {num:4,text:"퀵슬롯을 전부 비우고 단한번도 죽지않고 레이드 성공하기",note:"(전투 시작, 전투 후 스샷 필요)"},
+        {num:5,text:"17초를 맞춰서 레이드 성공 및 종료",note:"(마지막 클리어타임 표기를 기준으로 합니다)"},
+        {num:6,text:"나머지 두명이 미션 실패하기"},
+        {num:7,text:"마지막에 죽은상태로 레이드 클리어하기"},
+        {num:8,text:"방어구를 모두 입지않고 클리어하기"}
+      ]},
+      geulgi:{name:"글기 어려움",draw:7,missions:[
+        {num:1,text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기",note:"(조력자가 있을수도 있습니다)"},
+        {num:2,text:"혼자 3번이상 죽고 레이드 성공하기"},
+        {num:3,text:"방어구를 모두 입지않고 클리어하기",note:"(아이템 분해나 판매를 조심하세요! 잠그고 착용해제!)"},
+        {num:4,text:"17초를 맞춰서 레이드 성공 및 종료",note:"(마지막 클리어타임 표기를 기준으로 합니다)"},
+        {num:5,text:"나머지인원중 5명이상 미션 실패하기"},
+        {num:6,text:"마지막에 죽은상태로 레이드 클리어하기"},
+        {num:7,text:"운도 실력. 어떻게든 클리어만 하기"},
+        {num:8,text:"파괴되는 지형에서 낙사 두번이상하고 클리어하기"},
+        {num:9,text:"퀵슬롯을 전부 비우고 단한번도 죽지않고 레이드 성공하기",note:"(전투 시작, 전투 후 스샷 필요)"},
+        {num:10,text:"보스 전투중에 파티채팅으로 채팅 17회 하기"},
+        {num:11,text:"(레이드 실패하기 미션을 가진사람이 한명있습니다 비밀로 해주세요) 해당 미션을 가진사람에게 들키지 않고 도와서 레이드 실패하기",note:"- 레이드 실패하기 미션을 받은사람은 조력자를 맞추는 미션이 따로 있습니다. 들키지 마세요."},
+        {num:12,text:"악세를 하나도 착용하지않고 클리어하기",note:"(아이템 분해나 판매를 조심하세요! 잠그고 착용해제!)"},
+        {num:13,text:"진짜 아이디어가 없다 이젠 딜 3등안에 들기"},
+        {num:14,text:"음식 가장 먼저 주기(혼자먹기x)"},
+        {num:15,text:"본직업 외의 다른 직업으로 바꿔서 들키지않고 클리어하기"}
+      ]}
     };
 
+    const shuffle=(arr)=>{const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
+    function drawWithOneGuaranteed(totalMissions,drawCount){const restNums=totalMissions.filter(m=>m.num!==1).map(m=>m.num);const picked=shuffle(restNums).slice(0,drawCount-1);picked.push(1);return shuffle(picked)}
+    const appearProb=(mode,num)=>{const g=GAMES[mode];const N=g.missions.length;const D=g.draw;if(num===1)return 1;return (D-1)/(N-1)};
+    const fmtPercent=(p)=>`${Math.round(p*1000)/10}%`;
 
-    const shuffle = (arr) => {
-      const a = [...arr];
-      for(let i=a.length-1;i>0;i--){
-        const j = Math.floor(Math.random()*(i+1));
-        [a[i],a[j]]=[a[j],a[i]];
-      }
-      return a;
-    };
+    const cardsEl=document.getElementById('cards');
+    const drawBtn=document.getElementById('drawBtn');
+    const revealBtn=document.getElementById('revealBtn');
+    const resetBtn=document.getElementById('resetBtn');
+    const viewAllBtn=document.getElementById('viewAllBtn');
+    const toast=document.getElementById('toast');
+    const subtitle=document.getElementById('subtitle');
+    const modeSuccubus=document.getElementById('modeSuccubus');
+    const modeGeulgi=document.getElementById('modeGeulgi');
+    const modal=document.getElementById('modal');
+    const modalClose=document.getElementById('modalClose');
+    const modalTitle=document.getElementById('modalTitle');
+    const modalMeta=document.getElementById('modalMeta');
+    const missionList=document.getElementById('missionList');
 
-    function drawWithOneGuaranteed(totalMissions, drawCount) {
-      // 1번 필수 포함
-      const restNums = totalMissions.filter(m => m.num !== 1).map(m => m.num);
-      const picked = shuffle(restNums).slice(0, drawCount - 1);
-      picked.push(1);
-      return shuffle(picked);
-    }
+    let currentMode='succubus';
+    let drawn=[];
+    let autoRevealing=false;
 
+    function updateSubtitleAndButtons(){const g=GAMES[currentMode];subtitle.innerHTML=`${g.name}: <b>${g.missions.length}</b>개 중 <b>${g.draw}</b>장 뽑기 (1번 필수)`;drawBtn.textContent=`🎲 ${g.draw}장 뽑기`}
+    function activateMode(mode){currentMode=mode;modeSuccubus.classList.toggle('active',mode==='succubus');modeGeulgi.classList.toggle('active',mode==='geulgi');modeSuccubus.setAttribute('aria-selected',mode==='succubus');modeGeulgi.setAttribute('aria-selected',mode==='geulgi');updateSubtitleAndButtons();cardsEl.innerHTML='';drawn=[];autoRevealing=false;revealBtn.disabled=true;showToast(GAMES[mode].name)}
+    function showToast(msg){toast.textContent=msg;toast.classList.remove('show');void toast.offsetWidth;toast.classList.add('show')}
+    function confettiBurst(){const cvs=document.getElementById('fx');const ctx=cvs.getContext('2d');const w=cvs.width=window.innerWidth;const h=cvs.height=window.innerHeight;const pieces=Array.from({length:140},()=>({x:Math.random()*w,y:-10-Math.random()*h*0.3,vy:1+Math.random()*3,vx:-1+Math.random()*2,s:2+Math.random()*4,r:Math.random()*Math.PI,vr:-0.2+Math.random()*0.4,color:`hsl(${Math.random()*360},90%,60%)`}));let life=90;function tick(){ctx.clearRect(0,0,w,h);pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.color;ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);ctx.restore()});if(life-->0)requestAnimationFrame(tick);else ctx.clearRect(0,0,w,h)}tick()}
 
-    const cardsEl = document.getElementById('cards');
-    const drawBtn = document.getElementById('drawBtn');
-    const revealBtn = document.getElementById('revealBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const viewAllBtn = document.getElementById('viewAllBtn');
-    const toast = document.getElementById('toast');
-    const subtitle = document.getElementById('subtitle');
-
-    const modeSuccubus = document.getElementById('modeSuccubus');
-    const modeGeulgi = document.getElementById('modeGeulgi');
-
-
-    const modal = document.getElementById('modal');
-    const modalClose = document.getElementById('modalClose');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalMeta = document.getElementById('modalMeta');
-    const missionList = document.getElementById('missionList');
-
-
-    let currentMode = 'succubus'; // 'succubus' | 'geulgi'
-    let drawn = [];           
-    let autoRevealing = false;
-
-    function updateSubtitleAndButtons() {
-      const game = GAMES[currentMode];
-      subtitle.innerHTML = `${game.name}: <b>${game.missions.length}</b>개 중 <b>${game.draw}</b>장 뽑기 (1번 필수)`;
-      drawBtn.textContent = `🎲 ${game.draw}장 뽑기`;
-    }
-
-    function activateMode(mode) {
-      currentMode = mode;
-      modeSuccubus.classList.toggle('active', mode === 'succubus');
-      modeGeulgi.classList.toggle('active', mode === 'geulgi');
-      modeSuccubus.setAttribute('aria-selected', mode === 'succubus');
-      modeGeulgi.setAttribute('aria-selected', mode === 'geulgi');
-      updateSubtitleAndButtons();
-
-      cardsEl.innerHTML = '';
-      drawn = [];
-      autoRevealing = false;
-      revealBtn.disabled = true;
-      showToast(`${GAMES[mode].name}`);
-    }
-
-
-    function showToast(msg){
-      toast.textContent = msg; toast.classList.remove('show');
-      void toast.offsetWidth;
-      toast.classList.add('show');
-    }
-
-    function confettiBurst(){
-      const cvs = document.getElementById('fx');
-      const ctx = cvs.getContext('2d');
-      const w = cvs.width = window.innerWidth;
-      const h = cvs.height = window.innerHeight;
-      const pieces = Array.from({length: 140}, () => ({
-        x: Math.random()*w,
-        y: -10 - Math.random()*h*0.3,
-        vy: 1 + Math.random()*3,
-        vx: -1 + Math.random()*2,
-        s: 2 + Math.random()*4,
-        r: Math.random()*Math.PI,
-        vr: -0.2 + Math.random()*0.4,
-        color: `hsl(${Math.random()*360},90%,60%)`
-      }));
-      let life = 90;
-      function tick(){
-        ctx.clearRect(0,0,w,h);
-        pieces.forEach(p=>{
-          p.x += p.vx; p.y += p.vy; p.r += p.vr;
-          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
-          ctx.fillStyle = p.color; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
-          ctx.restore();
-        });
-        if(life-->0) requestAnimationFrame(tick); else ctx.clearRect(0,0,w,h);
-      }
-      tick();
-    }
-
-
-    function createCard(){
-      const wrap = document.createElement('div');
-      wrap.className = 'card';
-      wrap.innerHTML = `
-        <div class="card-inner">
-          <div class="face back"><div class="pattern">MISSION</div></div>
-          <div class="face front">
-            <div class="badge">미션 카드</div>
-            <div class="num">NO.<span class="no">?</span></div>
-            <div class="mission">...</div>
-            <div class="note"></div>
-          </div>
-        </div>`;
-      return wrap;
-    }
+    function createCard(){const wrap=document.createElement('div');wrap.className='card';wrap.innerHTML=`<div class="card-inner"><div class="face back"><div class="pattern">MISSION</div></div><div class="face front"><div class="badge">미션 카드</div><div class="num">NO.<span class="no">?</span></div><div class="prob-badge"></div><div class="mission">...</div><div class="note"></div></div></div>`;return wrap}
 
     function revealCardAt(index){
-      const nodes = [...cardsEl.children];
-      const wrap = nodes[index];
-      if (!wrap || wrap.classList.contains('revealed')) return;
-
-      const no = wrap.querySelector('.no');
-      const mission = wrap.querySelector('.mission');
-      const note = wrap.querySelector('.note');
-
-      const cardNum = drawn[index];
-      const info = GAMES[currentMode].missions.find(m=>m.num===cardNum);
-      no.textContent = info.num;
-      mission.textContent = info.text;
-      note.textContent = info.note || '';
-
+      const nodes=[...cardsEl.children];const wrap=nodes[index];if(!wrap||wrap.classList.contains('revealed'))return;
+      const no=wrap.querySelector('.no');const mission=wrap.querySelector('.mission');const note=wrap.querySelector('.note');const prob=wrap.querySelector('.prob-badge');
+      const cardNum=drawn[index];const info=GAMES[currentMode].missions.find(m=>m.num===cardNum);
+      no.textContent=info.num;mission.textContent=info.text;note.textContent=info.note||'';prob.textContent=`출현 확률 ${fmtPercent(appearProb(currentMode,info.num))}`;
       wrap.classList.add('revealed');
-
-      if (nodes.every(n => n.classList.contains('revealed'))) {
-        revealBtn.disabled = true;
-        confettiBurst();
-        showToast('모든 카드가 공개되었습니다!');
-      }
+      if(nodes.every(n=>n.classList.contains('revealed'))){revealBtn.disabled=true;confettiBurst();showToast('모든 카드가 공개되었습니다!')}
     }
 
-    function revealInOrder(){
-      if (autoRevealing) return;
-      autoRevealing = true;
+    function revealInOrder(){if(autoRevealing)return;autoRevealing=true;const nodes=[...cardsEl.children];let i=0;function step(){if(i>=nodes.length){autoRevealing=false;return}revealCardAt(i++);setTimeout(step,500)}step()}
 
-      const nodes = [...cardsEl.children];
-      let i = 0;
-      function step(){
-        if (i >= nodes.length) {
-          autoRevealing = false;
-          return;
-        }
-        revealCardAt(i++);
-        setTimeout(step, 500);
-      }
-      step();
-    }
+    modeSuccubus.addEventListener('click',()=>activateMode('succubus'));
+    modeGeulgi.addEventListener('click',()=>activateMode('geulgi'));
+    document.addEventListener('keydown',(e)=>{if(e.key==='Escape')modal.classList.remove('show')});
 
-    modeSuccubus.addEventListener('click', ()=>activateMode('succubus'));
-    modeGeulgi.addEventListener('click', ()=>activateMode('geulgi'));
-
-    document.addEventListener('keydown', (e)=>{
-      if (e.key === 'Escape') modal.classList.remove('show');
-    });
-
-    viewAllBtn.addEventListener('click', ()=>{
-      const game = GAMES[currentMode];
-      missionList.innerHTML = '';
-      game.missions.forEach(m=>{
-        const li = document.createElement('li');
-        li.innerHTML = `<strong>${m.num}.</strong> ${m.text}${m.note ? ` <span style="color:#94a3b8">${m.note}</span>` : ''}`;
-        missionList.appendChild(li);
+    viewAllBtn.addEventListener('click',()=>{
+      const g=GAMES[currentMode];missionList.innerHTML='';
+      g.missions.forEach(m=>{
+        const li=document.createElement('li');const p=fmtPercent(appearProb(currentMode,m.num));
+        li.innerHTML=`<div class="li-head"><span class="li-num">NO.${m.num}</span><span class="li-prob">출현 확률 ${p}</span></div><div>${m.text}${m.note?` <span style="color:#94a3b8">${m.note}</span>`:''}</div>`;
+        missionList.appendChild(li)
       });
-      modalTitle.textContent = '미션 전체보기';
-      modalMeta.textContent = `· ${game.name} · ${game.missions.length}개 중 ${game.draw}장 뽑기 · 1번 필수`;
-      modal.classList.add('show');
+      modalTitle.textContent='미션 전체보기';modalMeta.textContent=`· ${g.name} · ${g.missions.length}개 중 ${g.draw}장 뽑기 · 1번 필수`;modal.classList.add('show')
     });
-    modalClose.addEventListener('click', ()=>modal.classList.remove('show'));
-    modal.addEventListener('click', (e)=>{ if (e.target === modal) modal.classList.remove('show'); });
+    modalClose.addEventListener('click',()=>modal.classList.remove('show'));
+    modal.addEventListener('click',(e)=>{if(e.target===modal)modal.classList.remove('show')});
 
-
-    drawBtn.addEventListener('click', () => {
-      const game = GAMES[currentMode];
-
-
-      cardsEl.innerHTML = '';
-      drawn = drawWithOneGuaranteed(game.missions, game.draw);
-      autoRevealing = false;
-
-      drawn.forEach((n, i) => {
-        const el = createCard();
-        el.style.opacity = 0; el.style.transform = 'translateY(10px)';
-        el.addEventListener('click', () => revealCardAt(i));
-        cardsEl.appendChild(el);
-        setTimeout(()=>{
-          el.style.transition = 'transform .5s ease, opacity .5s ease';
-          el.style.opacity = 1; el.style.transform = 'translateY(0)';
-        }, 160*i);
-      });
-
-
-      const deck = document.getElementById('deckStack');
-      deck.animate([
-        { transform:'translateY(0) rotate(0deg)' },
-        { transform:'translateY(2px) rotate(1deg)' },
-        { transform:'translateY(-2px) rotate(-1deg)' },
-        { transform:'translateY(0) rotate(0deg)' }
-      ], { duration: 480, easing:'ease-in-out' });
-
-      showToast(`카드를 셔플했습니다! (1번 필수, ${game.draw}장)`);
-      revealBtn.disabled = false;
+    drawBtn.addEventListener('click',()=>{
+      const g=GAMES[currentMode];cardsEl.innerHTML='';drawn=drawWithOneGuaranteed(g.missions,g.draw);autoRevealing=false;
+      drawn.forEach((n,i)=>{const el=createCard();el.style.opacity=0;el.style.transform='translateY(10px)';el.addEventListener('click',()=>revealCardAt(i));cardsEl.appendChild(el);setTimeout(()=>{el.style.transition='transform .5s ease, opacity .5s ease';el.style.opacity=1;el.style.transform='translateY(0)'},160*i)});
+      const deck=document.getElementById('deckStack');deck.animate([{transform:'translateY(0) rotate(0deg)'},{transform:'translateY(2px) rotate(1deg)'},{transform:'translateY(-2px) rotate(-1deg)'},{transform:'translateY(0) rotate(0deg)'}],{duration:480,easing:'ease-in-out'});
+      showToast(`카드를 셔플했습니다! (1번 필수, ${g.draw}장)`);revealBtn.disabled=false
     });
 
-    revealBtn.addEventListener('click', revealInOrder);
+    revealBtn.addEventListener('click',revealInOrder);
 
-
-    resetBtn.addEventListener('click', () => {
-      cardsEl.innerHTML = '';
-      drawn = [];
-      autoRevealing = false;
-      revealBtn.disabled = true;
-      showToast('초기화 완료');
-    });
+    resetBtn.addEventListener('click',()=>{cardsEl.innerHTML='';drawn=[];autoRevealing=false;revealBtn.disabled=true;showToast('초기화 완료')});
 
     activateMode('succubus');
   </script>
