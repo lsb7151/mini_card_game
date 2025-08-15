@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>미션 레이드</title>
-  <meta name="description" content="7개의 미션 카드 중 3장을 뽑음 (1번 카드는 항상 포함)" />
+  <meta name="description" content="봄비길드 이벤트용 카드뽑기 아무도 내 고생은 몰라주지" />
   <style>
     :root{
       --bg: #0f172a;          /* slate-900 */
@@ -27,7 +27,7 @@
       color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Nanum Gothic", sans-serif;
       display:flex; align-items:center; justify-content:center; padding:24px;
     }
-    .app{width:min(1100px,100%);}
+    .app{width:min(1200px,100%);}
     header{display:flex; gap:12px; align-items:flex-end; justify-content:space-between; margin-bottom:16px}
     .title{font-size:clamp(22px,4vw,36px); font-weight:800; letter-spacing:.3px}
     .subtitle{color:var(--muted); font-size:14px}
@@ -39,12 +39,16 @@
     .btn.primary{background:linear-gradient(180deg,#16a34a,#15803d); border-color:#16a34a}
     .btn.primary:hover{background:linear-gradient(180deg,#22c55e,#16a34a)}
     .btn.ghost{background:transparent}
+    .btn.warn{background:linear-gradient(180deg,#ef4444,#b91c1c); border-color:#ef4444}
+
+    .segmented{display:flex; gap:6px; padding:6px; background:#0b1328; border:1px solid rgba(148,163,184,.25); border-radius:14px}
+    .segmented button{border:none; background:transparent; color:#e5e7eb; padding:8px 12px; border-radius:10px; font-weight:700; cursor:pointer}
+    .segmented button.active{background:#1f2a52}
 
     .deck-area{display:grid; grid-template-columns: 1fr; gap:16px; padding:16px}
     .area{border-top:1px solid rgba(148,163,184,.18); padding-top:12px}
 
-    .cards{display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:16px}
-    @media (max-width: 860px){ .cards{grid-template-columns:1fr} }
+    .cards{display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:16px}
 
     .card{perspective:1000px; position:relative; height:220px}
     .card-inner{position:absolute; inset:0; transform-style:preserve-3d; transition: transform .9s cubic-bezier(.2,.7,.2,1)}
@@ -89,6 +93,16 @@
     @keyframes toast{ 0%{opacity:0; transform:translate(-50%,6px)} 10%,85%{opacity:1; transform:translate(-50%,0)} 100%{opacity:0; transform:translate(-50%,-4px)} }
 
     .confetti{ position:fixed; inset:0; pointer-events:none }
+
+    .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.55); z-index:50 }
+    .modal.show{ display:flex }
+    .modal-card{ width:min(800px,92%); background:#0b1328; color:#e5e7eb; border:1px solid rgba(148,163,184,.28); border-radius:16px; box-shadow:var(--shadow); }
+    .modal-head{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom:1px solid rgba(148,163,184,.2)}
+    .modal-body{ max-height:70vh; overflow:auto; padding:16px }
+    .modal-close{ border:none; background:#111827; color:#e5e7eb; border-radius:10px; padding:8px 12px; cursor:pointer }
+    .mission-list{ margin:0; padding-left:20px }
+    .mission-list li{ margin:6px 0 }
+    .mode-meta{ color:var(--muted); font-size:12px; margin-left:8px }
   </style>
 </head>
 <body>
@@ -96,15 +110,22 @@
     <header>
       <div>
         <div class="title">미션 레이드</div>
-        <div class="subtitle">7개의 미션 중 <b>3장</b>을 뽑음. (<b>1번 미션</b>은 항상 포함)</div>
+        <div id="subtitle" class="subtitle">레이드를 선택하세요.</div>
       </div>
     </header>
 
     <section class="panel">
       <div class="toolbar">
+
+        <div class="segmented" role="tablist" aria-label="레이드 선택">
+          <button id="modeSuccubus" class="active" role="tab" aria-selected="true">서큐버스</button>
+          <button id="modeGeulgi" role="tab" aria-selected="false">글기 어려움</button>
+        </div>
+
         <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center">
-          <button class="btn primary" id="drawBtn">🎲 3장 뽑기</button>
+          <button class="btn primary" id="drawBtn">🎲 뽑기</button>
           <button class="btn ghost" id="revealBtn" disabled>🃏 순서대로 공개</button>
+          <button class="btn" id="viewAllBtn">미션 전체보기</button>
           <button class="btn" id="resetBtn">초기화</button>
         </div>
       </div>
@@ -125,191 +146,287 @@
     </section>
   </div>
 
+
+  <div class="modal" id="modal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div>
+          <strong id="modalTitle">미션 전체보기</strong>
+          <span id="modalMeta" class="mode-meta"></span>
+        </div>
+        <button class="modal-close" id="modalClose">닫기</button>
+      </div>
+      <div class="modal-body">
+        <ol id="missionList" class="mission-list"></ol>
+      </div>
+    </div>
+  </div>
+
   <canvas class="confetti" id="fx"></canvas>
   <div class="toast" id="toast">카드를 셔플했습니다!</div>
 
- <script>
-  // ===== 데이터: 7개 미션 =====
-  const MISSIONS = [
-    {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기"},
-    {num:2, text:"내부(블랙서큐버스 브레이크 기믹)에 단 한 번도 참여하지 않고 레이드 성공하기"},
-    {num:3, text:"혼자 3번 이상 죽고 레이드 성공하기"},
-    {num:4, text:"퀵슬롯을 전부 비우고 단 한 번도 죽지 않고 레이드 성공하기", note:"(전투 시작/후 스샷 필수)"},
-    {num:5, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어 타임 기준)"},
-    {num:6, text:"나머지 두 명이 미션 실패하기"},
-    {num:7, text:"마지막에 죽은 상태로 레이드 클리어하기"},
-  ];
+  <script>
 
-  // 유틸: 섞기
-  const shuffle = (arr) => {
-    const a = [...arr];
-    for(let i=a.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [a[i],a[j]]=[a[j],a[i]];
-    }
-    return a;
-  };
-
-  // 3장 뽑기 (1번 카드 반드시 포함)
-  function drawThreeWithOneGuaranteed(){
-    const rest = [2,3,4,5,6,7];
-    const pick = shuffle(rest).slice(0,2); // 2장 뽑고
-    pick.push(1);                           // 1번 추가
-    return shuffle(pick);                   // 순서 섞기
-  }
-
-  // DOM 참조
-  const cardsEl = document.getElementById('cards');
-  const drawBtn = document.getElementById('drawBtn');
-  const revealBtn = document.getElementById('revealBtn');
-  const resetBtn = document.getElementById('resetBtn');
-  const toast = document.getElementById('toast');
-
-  let drawn = [];           // 뽑힌 카드 번호 배열 (좌→우 대응)
-  let autoRevealing = false; // 자동 공개 중 여부
-
-  // 토스트
-  function showToast(msg){
-    toast.textContent = msg; toast.classList.remove('show');
-    void toast.offsetWidth; // reflow
-    toast.classList.add('show');
-  }
-
-  // 컨페티
-  function confettiBurst(){
-    const cvs = document.getElementById('fx');
-    const ctx = cvs.getContext('2d');
-    const w = cvs.width = window.innerWidth;
-    const h = cvs.height = window.innerHeight;
-    const pieces = Array.from({length: 120}, () => ({
-      x: Math.random()*w,
-      y: -10 - Math.random()*h*0.3,
-      vy: 1 + Math.random()*3,
-      vx: -1 + Math.random()*2,
-      s: 2 + Math.random()*4,
-      r: Math.random()*Math.PI,
-      vr: -0.2 + Math.random()*0.4,
-      color: `hsl(${Math.random()*360},90%,60%)`
-    }));
-    let life = 90; // frames
-    function tick(){
-      ctx.clearRect(0,0,w,h);
-      pieces.forEach(p=>{
-        p.x += p.vx; p.y += p.vy; p.r += p.vr;
-        ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
-        ctx.fillStyle = p.color; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
-        ctx.restore();
-      });
-      if(life-->0) requestAnimationFrame(tick); else ctx.clearRect(0,0,w,h);
-    }
-    tick();
-  }
-
-  // 카드 한 장 공개
-  function revealCardAt(index){
-    const nodes = [...cardsEl.children];
-    const wrap = nodes[index];
-    if (!wrap || wrap.classList.contains('revealed')) return;
-
-    const no = wrap.querySelector('.no');
-    const mission = wrap.querySelector('.mission');
-    const note = wrap.querySelector('.note');
-
-    const cardNum = drawn[index];
-    const info = MISSIONS.find(m=>m.num===cardNum);
-    no.textContent = info.num;
-    mission.textContent = info.text;
-    note.textContent = info.note || '';
-
-    wrap.classList.add('revealed');
-
-    // 모두 공개되면 마무리
-    if (nodes.every(n => n.classList.contains('revealed'))) {
-      revealBtn.disabled = true;
-      confettiBurst();
-      showToast('모든 카드가 공개되었습니다!');
-    }
-  }
-
-  // 순서대로 자동 공개 (0.5초 간격)
-  function revealInOrder(){
-    if (autoRevealing) return;
-    autoRevealing = true;
-
-    const nodes = [...cardsEl.children];
-    let i = 0;
-    function step(){
-      if (i >= nodes.length) {
-        autoRevealing = false;
-        return;
+    const GAMES = {
+      succubus: {
+        name: "서큐버스",
+        draw: 3,
+        missions: [
+          {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기"},
+          {num:2, text:"내부(블랙서큐버스 브레이크 기믹)에 단 한번도 참여하지않고 레이드 성공하기"},
+          {num:3, text:"혼자 3번이상 죽고 레이드 성공하기"},
+          {num:4, text:"퀵슬롯을 전부 비우고 단한번도 죽지않고 레이드 성공하기", note:"(전투 시작, 전투 후 스샷 필요)"},
+          {num:5, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어타임 표기를 기준으로 합니다)"},
+          {num:6, text:"나머지 두명이 미션 실패하기"},
+          {num:7, text:"마지막에 죽은상태로 레이드 클리어하기"},
+          {num:8, text:"방어구를 모두 입지않고 클리어하기"}
+        ]
+      },
+      geulgi: {
+        name: "글기 어려움",
+        draw: 7,
+        missions: [
+          {num:1, text:"게임 나가기를 제외 한 무슨 수를 써서라도 레이드 실패하기", note:"(조력자가 있을수도 있습니다)"},
+          {num:2, text:"혼자 3번이상 죽고 레이드 성공하기"},
+          {num:3, text:"방어구를 모두 입지않고 클리어하기", note:"(아이템 분해나 판매를 조심하세요! 잠그고 착용해제!)"},
+          {num:4, text:"17초를 맞춰서 레이드 성공 및 종료", note:"(마지막 클리어타임 표기를 기준으로 합니다)"},
+          {num:5, text:"나머지인원중 5명이상 미션 실패하기"},
+          {num:6, text:"마지막에 죽은상태로 레이드 클리어하기"},
+          {num:7, text:"운도 실력. 어떻게든 클리어만 하기"},
+          {num:8, text:"파괴되는 지형에서 낙사 두번이상하고 클리어하기"},
+          {num:9, text:"퀵슬롯을 전부 비우고 단한번도 죽지않고 레이드 성공하기", note:"(전투 시작, 전투 후 스샷 필요)"},
+          {num:10, text:"보스 전투중에 파티채팅으로 채팅 17회 하기"},
+          {num:11, text:"(레이드 실패하기 미션을 가진사람이 한명있습니다 비밀로 해주세요) 해당 미션을 가진사람에게 들키지 않고 도와서 레이드 실패하기", note:"- 레이드 실패하기 미션을 받은사람은 조력자를 맞추는 미션이 따로 있습니다. 들키지 마세요."},
+          {num:12, text:"악세를 하나도 착용하지않고 클리어하기", note:"(아이템 분해나 판매를 조심하세요! 잠그고 착용해제!)"},
+          {num:13, text:"진짜 아이디어가 없다 이젠 딜 3등안에 들기"}
+        ]
       }
-      revealCardAt(i++);
-      setTimeout(step, 500);
+    };
+
+
+    const shuffle = (arr) => {
+      const a = [...arr];
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i],a[j]]=[a[j],a[i]];
+      }
+      return a;
+    };
+
+    function drawWithOneGuaranteed(totalMissions, drawCount) {
+      // 1번 필수 포함
+      const restNums = totalMissions.filter(m => m.num !== 1).map(m => m.num);
+      const picked = shuffle(restNums).slice(0, drawCount - 1);
+      picked.push(1);
+      return shuffle(picked);
     }
-    step();
-  }
 
-  // 카드 DOM 생성
-  function createCard(){
-    const wrap = document.createElement('div');
-    wrap.className = 'card';
-    wrap.innerHTML = `
-      <div class="card-inner">
-        <div class="face back"><div class="pattern">MISSION</div></div>
-        <div class="face front">
-          <div class="badge">미션 카드</div>
-          <div class="num">NO.<span class="no">?</span></div>
-          <div class="mission">...</div>
-          <div class="note"></div>
-        </div>
-      </div>`;
-    return wrap;
-  }
 
-  // 뽑기
-  drawBtn.addEventListener('click', () => {
-    // 초기화
-    cardsEl.innerHTML = '';
-    drawn = drawThreeWithOneGuaranteed();
-    autoRevealing = false;
+    const cardsEl = document.getElementById('cards');
+    const drawBtn = document.getElementById('drawBtn');
+    const revealBtn = document.getElementById('revealBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const viewAllBtn = document.getElementById('viewAllBtn');
+    const toast = document.getElementById('toast');
+    const subtitle = document.getElementById('subtitle');
 
-    // 3장의 자리 생성 + 덱에서 날아오는 애니메이션 + 클릭 공개 연결
-    drawn.forEach((n, i) => {
-      const el = createCard();
-      el.style.opacity = 0; el.style.transform = 'translateY(10px)';
-      // 카드 클릭 시 해당 카드 공개
-      el.addEventListener('click', () => revealCardAt(i));
-      cardsEl.appendChild(el);
-      setTimeout(()=>{
-        el.style.transition = 'transform .5s ease, opacity .5s ease';
-        el.style.opacity = 1; el.style.transform = 'translateY(0)';
-      }, 180*i);
+    const modeSuccubus = document.getElementById('modeSuccubus');
+    const modeGeulgi = document.getElementById('modeGeulgi');
+
+
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modalClose');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMeta = document.getElementById('modalMeta');
+    const missionList = document.getElementById('missionList');
+
+
+    let currentMode = 'succubus'; // 'succubus' | 'geulgi'
+    let drawn = [];           
+    let autoRevealing = false;
+
+    function updateSubtitleAndButtons() {
+      const game = GAMES[currentMode];
+      subtitle.innerHTML = `${game.name}: <b>${game.missions.length}</b>개 중 <b>${game.draw}</b>장 뽑기 (1번 필수)`;
+      drawBtn.textContent = `🎲 ${game.draw}장 뽑기`;
+    }
+
+    function activateMode(mode) {
+      currentMode = mode;
+      modeSuccubus.classList.toggle('active', mode === 'succubus');
+      modeGeulgi.classList.toggle('active', mode === 'geulgi');
+      modeSuccubus.setAttribute('aria-selected', mode === 'succubus');
+      modeGeulgi.setAttribute('aria-selected', mode === 'geulgi');
+      updateSubtitleAndButtons();
+
+      cardsEl.innerHTML = '';
+      drawn = [];
+      autoRevealing = false;
+      revealBtn.disabled = true;
+      showToast(`${GAMES[mode].name}`);
+    }
+
+
+    function showToast(msg){
+      toast.textContent = msg; toast.classList.remove('show');
+      void toast.offsetWidth;
+      toast.classList.add('show');
+    }
+
+    function confettiBurst(){
+      const cvs = document.getElementById('fx');
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width = window.innerWidth;
+      const h = cvs.height = window.innerHeight;
+      const pieces = Array.from({length: 140}, () => ({
+        x: Math.random()*w,
+        y: -10 - Math.random()*h*0.3,
+        vy: 1 + Math.random()*3,
+        vx: -1 + Math.random()*2,
+        s: 2 + Math.random()*4,
+        r: Math.random()*Math.PI,
+        vr: -0.2 + Math.random()*0.4,
+        color: `hsl(${Math.random()*360},90%,60%)`
+      }));
+      let life = 90;
+      function tick(){
+        ctx.clearRect(0,0,w,h);
+        pieces.forEach(p=>{
+          p.x += p.vx; p.y += p.vy; p.r += p.vr;
+          ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.r);
+          ctx.fillStyle = p.color; ctx.fillRect(-p.s/2,-p.s/2,p.s,p.s);
+          ctx.restore();
+        });
+        if(life-->0) requestAnimationFrame(tick); else ctx.clearRect(0,0,w,h);
+      }
+      tick();
+    }
+
+
+    function createCard(){
+      const wrap = document.createElement('div');
+      wrap.className = 'card';
+      wrap.innerHTML = `
+        <div class="card-inner">
+          <div class="face back"><div class="pattern">MISSION</div></div>
+          <div class="face front">
+            <div class="badge">미션 카드</div>
+            <div class="num">NO.<span class="no">?</span></div>
+            <div class="mission">...</div>
+            <div class="note"></div>
+          </div>
+        </div>`;
+      return wrap;
+    }
+
+    function revealCardAt(index){
+      const nodes = [...cardsEl.children];
+      const wrap = nodes[index];
+      if (!wrap || wrap.classList.contains('revealed')) return;
+
+      const no = wrap.querySelector('.no');
+      const mission = wrap.querySelector('.mission');
+      const note = wrap.querySelector('.note');
+
+      const cardNum = drawn[index];
+      const info = GAMES[currentMode].missions.find(m=>m.num===cardNum);
+      no.textContent = info.num;
+      mission.textContent = info.text;
+      note.textContent = info.note || '';
+
+      wrap.classList.add('revealed');
+
+      if (nodes.every(n => n.classList.contains('revealed'))) {
+        revealBtn.disabled = true;
+        confettiBurst();
+        showToast('모든 카드가 공개되었습니다!');
+      }
+    }
+
+    function revealInOrder(){
+      if (autoRevealing) return;
+      autoRevealing = true;
+
+      const nodes = [...cardsEl.children];
+      let i = 0;
+      function step(){
+        if (i >= nodes.length) {
+          autoRevealing = false;
+          return;
+        }
+        revealCardAt(i++);
+        setTimeout(step, 500);
+      }
+      step();
+    }
+
+    modeSuccubus.addEventListener('click', ()=>activateMode('succubus'));
+    modeGeulgi.addEventListener('click', ()=>activateMode('geulgi'));
+
+    document.addEventListener('keydown', (e)=>{
+      if (e.key === 'Escape') modal.classList.remove('show');
     });
 
-    // 덱 흔들림 느낌
-    const deck = document.getElementById('deckStack');
-    deck.animate([
-      { transform:'translateY(0) rotate(0deg)' },
-      { transform:'translateY(2px) rotate(1deg)' },
-      { transform:'translateY(-2px) rotate(-1deg)' },
-      { transform:'translateY(0) rotate(0deg)' }
-    ], { duration: 480, easing:'ease-in-out' });
+    viewAllBtn.addEventListener('click', ()=>{
+      const game = GAMES[currentMode];
+      missionList.innerHTML = '';
+      game.missions.forEach(m=>{
+        const li = document.createElement('li');
+        li.innerHTML = `<strong>${m.num}.</strong> ${m.text}${m.note ? ` <span style="color:#94a3b8">${m.note}</span>` : ''}`;
+        missionList.appendChild(li);
+      });
+      modalTitle.textContent = '미션 전체보기';
+      modalMeta.textContent = `· ${game.name} · ${game.missions.length}개 중 ${game.draw}장 뽑기 · 1번 필수`;
+      modal.classList.add('show');
+    });
+    modalClose.addEventListener('click', ()=>modal.classList.remove('show'));
+    modal.addEventListener('click', (e)=>{ if (e.target === modal) modal.classList.remove('show'); });
 
-    showToast('카드를 셔플했습니다! (1번 카드 포함 보장)');
-    revealBtn.disabled = false;
-  });
 
-  // 순서대로 공개
-  revealBtn.addEventListener('click', revealInOrder);
+    drawBtn.addEventListener('click', () => {
+      const game = GAMES[currentMode];
 
-  // 초기화
-  resetBtn.addEventListener('click', () => {
-    cardsEl.innerHTML = '';
-    drawn = [];
-    autoRevealing = false;
-    revealBtn.disabled = true;
-    showToast('초기화 완료');
-  });
-</script>
+
+      cardsEl.innerHTML = '';
+      drawn = drawWithOneGuaranteed(game.missions, game.draw);
+      autoRevealing = false;
+
+      drawn.forEach((n, i) => {
+        const el = createCard();
+        el.style.opacity = 0; el.style.transform = 'translateY(10px)';
+        el.addEventListener('click', () => revealCardAt(i));
+        cardsEl.appendChild(el);
+        setTimeout(()=>{
+          el.style.transition = 'transform .5s ease, opacity .5s ease';
+          el.style.opacity = 1; el.style.transform = 'translateY(0)';
+        }, 160*i);
+      });
+
+
+      const deck = document.getElementById('deckStack');
+      deck.animate([
+        { transform:'translateY(0) rotate(0deg)' },
+        { transform:'translateY(2px) rotate(1deg)' },
+        { transform:'translateY(-2px) rotate(-1deg)' },
+        { transform:'translateY(0) rotate(0deg)' }
+      ], { duration: 480, easing:'ease-in-out' });
+
+      showToast(`카드를 셔플했습니다! (1번 필수, ${game.draw}장)`);
+      revealBtn.disabled = false;
+    });
+
+    revealBtn.addEventListener('click', revealInOrder);
+
+
+    resetBtn.addEventListener('click', () => {
+      cardsEl.innerHTML = '';
+      drawn = [];
+      autoRevealing = false;
+      revealBtn.disabled = true;
+      showToast('초기화 완료');
+    });
+
+    activateMode('succubus');
+  </script>
 </body>
 </html>
