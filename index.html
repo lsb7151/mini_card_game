@@ -21,13 +21,24 @@
       --shadow: 0 10px 30px rgba(0,0,0,.35);
     }
     *{box-sizing:border-box}
-    html,body{height:100%}
-    body{
-      margin:0; background: radial-gradient(1000px 500px at 50% -20%,#1f2937 0%,#0f172a 50%,#0b1022 100%);
-      color:var(--ink); font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Nanum Gothic", sans-serif;
-      display:flex; align-items:center; justify-content:center; padding:24px;
-    }
-    .app{width:min(1200px,100%);}
+    html, body{
+  min-height: 100%;
+  height: auto;
+}
+  body{
+  margin:0;
+  background: radial-gradient(1000px 500px at 50% -20%,#1f2937 0%,#0f172a 50%,#0b1022 100%);
+  color:var(--ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Nanum Gothic", sans-serif;
+  display:block;                /* 스크롤 정상화 */
+  padding:24px 16px;
+  overflow-y:auto;              /* iOS 포함 스크롤 보장 */
+  -webkit-overflow-scrolling: touch;
+}
+   .app{
+  width:min(1200px,100%);
+  margin: 0 auto;              /* 가운데 정렬 */
+}
     header{display:flex; gap:12px; align-items:flex-end; justify-content:space-between; margin-bottom:16px}
     .title{font-size:clamp(22px,4vw,36px); font-weight:800; letter-spacing:.3px}
     .subtitle{color:var(--muted); font-size:14px}
